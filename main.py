@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-from scipy.stats import norm
-import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QFileDialog
 
 
@@ -15,15 +12,17 @@ from pyqtgraph import *
 import sqlite3
 import numpy as np
 import pandas
-import datetime
-import time
-import matplotlib
 
-matplotlib.use('Qt5Agg')
+import time
+
+
+
+#matplotlib.use('Qt5Agg')
 
 
 rawDataPath = "C:\\Users\\qiliu102\\Documents\\ROVERGUI\\firsttest\\0612.csv"
 selCh = ["GFX_FB_V", "CORE_FB_V", "SOC_FB_V", "VDDP_V", "GFX_PH1_CSR", "CORE_PH1_CSR", "SOC_PH1_CSR", "VDDP_CSR"]
+selCh_g2 = ['SOC_FB_V', '', '', '']
 refresh = [0.1, 0.1, 1]
 chList = [0, 1, 2, 3]
 dataList = []
@@ -42,7 +41,7 @@ timing_p1 = 0
 arr_g2 = []
 data_cfg = []
 energy = [0, 0, 0, 0]
-conn = sqlite3.connect("rover.db", check_same_thread=False)
+conn = sqlite3.connect("rover_v1f.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor1 = conn.cursor()
 
@@ -51,7 +50,7 @@ def DataPaser(refreshRate, powerrail0_v, powerrail1_v, powerrail2_v, powerrail3_
               powerrail2_csr, powerrail3_csr):
     cmd_data_filter = 'select ' + powerrail0_v + ',' + powerrail1_v + ',' + powerrail2_v + ',' + powerrail3_v + ',' + powerrail0_csr + ',' + powerrail1_csr + ',' + powerrail2_csr + ',' + powerrail3_csr + ' from roverdata WHERE Seconds LIKE \'_\' OR Seconds LIKE \'__\' '
     print(cmd_data_filter)
-    conn = sqlite3.connect("rover.db")
+    conn = sqlite3.connect("rover_v1f.db")
     cursor = conn.cursor()
     cursor.execute(cmd_data_filter)
 
@@ -90,12 +89,16 @@ class BackendThread(QThread):
 
 
 class BackendThreadTable(QThread):
+    def __init__(self):
+        super(BackendThreadTable, self).__init__()
+        self.is_running = True
+        global timing
     upadte_table = pyqtSignal(str, str, str, str, str, str, str, str)
-    global timing
+
 
     def run(self):
         cnt = 0
-        while True:
+        while self.is_running:
             for row in range(len(dataList)):
                 self.upadte_table.emit(str(dataList[row][0]), str(dataList[row][1]), str(dataList[row][2]),
                                        str(dataList[row][3]), str(dataList[row][4]), str(dataList[row][5]),
@@ -106,11 +109,25 @@ class BackendThreadTable(QThread):
                 if timing > 30:
                     return
 
+    def stop(self):
+        self.is_running = False
+        print('stop table printing')
+        self.terminate()
+    def clear(self):
+        cnt = 0
+        self.terminate()
+        while self.is_running:
+            self.upadte_table.emit(str(0),str(0),str(0),str(0),str(0),str(0),str(0),str(0))
+            cnt = cnt + refresh[1]
+            time.sleep(refresh[1])
+            if timing > 30:
+                return
 
 class graph_drawing(QThread):
-    #draw_graph = pyqtSignal(str, str, str, str, str, str, str, str)
     def __init__(self):
         super(graph_drawing, self).__init__()
+        self.is_running = True
+        global timing
 
     def run(self):
         global graph_x
@@ -120,12 +137,11 @@ class graph_drawing(QThread):
         global graph_y4
         global timing_p1
         while True:
-            while (timing_p1 <= 30):
+            while (timing_p1 <= 30) and self.is_running:
                 # print("timeing is %d" % timing)
                 cmd_data_filter = 'select Seconds,' + selCh[0] + ',' + selCh[1] + ',' + selCh[2] + ',' + selCh[
                     3] + ' from roverdata WHERE (Seconds LIKE \'_\' OR Seconds LIKE \'__\' OR Seconds LIKE \'_._\' OR Seconds LIKE \'__._\') AND Seconds = ' + str('{:g}'.format(timing_p1))
                 timing_p1 = timing_p1 + 0.4
-                # print(cmd_data_filter)
                 cursor.execute(cmd_data_filter)
                 tmp = cursor.fetchall()
                 tmp1 = numpy.array(tmp, dtype=numpy.float64)
@@ -134,13 +150,7 @@ class graph_drawing(QThread):
                 graph_y2.append(float(tmp1[:, 2]))
                 graph_y3.append(float(tmp1[:, 3]))
                 graph_y4.append(float(tmp1[:, 4]))
-                    # print('####')
-                    # print(timing_p1)
-                    # print(graph_x)
-                    # print(graph_y)
-                    # print(graph_y2)
-                    # print(graph_y3)
-                    # print(graph_y4)
+
                 myRoverUI.curver.setData(graph_x, graph_y)
                 myRoverUI.curver2.setData(graph_x, graph_y2)
                 myRoverUI.curver3.setData(graph_x, graph_y3)
@@ -148,6 +158,11 @@ class graph_drawing(QThread):
                 # time.sleep(0.1)
                 if timing_p1 > 30:
                     return
+    def stop(self):
+        self.is_running = False
+        print('stop graph1 drawing')
+        #self.terminate()
+
 
 
 class graph2_drawing(QThread):
@@ -155,33 +170,31 @@ class graph2_drawing(QThread):
 
     def __init__(self):
         super(graph2_drawing, self).__init__()
+        self.is_running = True
+        global timing
 
     def run(self):
         global timing2
         global arr_g2
         arr_tmp = arr_g2.copy()
-        while timing2 <= 30:
+        while timing2 <= 30 and self.is_running:
             start = time.time()
             hist_bins = 30
             timing2 = timing2 + 0.5
-            A = 'select ' + selCh[0] + ' from roverdata WHERE (Seconds LIKE \'_._\' OR Seconds LIKE \'__._\' OR Seconds LIKE \'_\' OR Seconds LIKE \'__\') AND Seconds = ' + str('{:g}'.format(timing2))
-            # print(A)
+            A = 'select ' + selCh_g2[0] + ' from roverdata WHERE (Seconds LIKE \'_._\' OR Seconds LIKE \'__._\' OR Seconds LIKE \'_\' OR Seconds LIKE \'__\') AND Seconds = ' + str('{:g}'.format(timing2))
+            print(A)
             cursor1.execute(A)
 
             values = cursor1.fetchall()
             # print(values)
             arr = np.array(values, dtype=np.float64)
             arr_tmp = numpy.append(arr_tmp, arr.copy(), axis=0)
-            # print("#####ori")
-            # print(arr_tmp)
             if timing2 > 10:
                 count = int((timing2 - 10) * 2)
             else:
                 count = 0
-            # print(count)
+
             arr_g2 = arr_tmp[count:]
-            # print("#####after")
-            # print(arr_g2)
             m = arr_g2.copy()
 
             mu = np.mean(m)
@@ -211,37 +224,10 @@ class graph2_drawing(QThread):
 
             stri = "run time: %f seconds" % (end - start)
             print(stri)
-
-#         global timing2
-#         global arr_g2
-#         hist_bins = 30
-#         timing2 = timing2 + 500
-#         A = 'select ' + 'MEMIO_MEM_P' + ' from roverdata WHERE (Seconds LIKE \'_._\' OR Seconds LIKE \'__._\' OR Seconds LIKE \'_\' OR Seconds LIKE \'__\') AND Seconds = ' + str(
-#             timing2/1000).rstrip('.0')
-#         print(A)
-#         cursor.execute(A)
-#
-#         values = cursor.fetchall()
-#         arr = np.array(values, dtype=np.float64)
-#         arr_g2 = numpy.append(arr_g2, arr.copy(), axis=0)
-#         m = arr_g2.copy()
-#         mu = np.mean(m)
-#         sigma = np.std(m)
-#         #n, bins, patches = plt.hist(m, hist_bins, density=0, alpha=0.75)
-#         histo = plt.hist(m, hist_bins, density=0)
-#         title = 'Histogram: μ= ' + str(round(mu, 2)) + ' σ= ' + str(round(sigma, 2))  # 中文标题 u'xxx'
-#         self.graphicsView.setLabels(title=title)
-#
-#         width = histo[1][1]-histo[1][0]
-#
-#         xMin = min(arr_g2).copy()
-#         xMax = max(arr_g2).copy()
-#         yMax = max((histo[0] / len(arr_g2))).copy()
-#         self.graphicsView.setRange(xRange=(xMin, xMax), yRange=(0, yMax))
-#         bg1 = pyqtgraph.BarGraphItem(x=histo[1][0:hist_bins], height=histo[0] / len(arr_g2),width=width, brush='g')
-#         self.graphicsView.clear()
-#         self.graphicsView.addItem(bg1)
-
+    def stop(self):
+        self.is_running = False
+        print('stop graph2 drawing')
+        #self.terminate()
 
 class RoverUI(QMainWindow, Ui_Dialog):
     def __init__(self, parent=None):
@@ -266,8 +252,8 @@ class RoverUI(QMainWindow, Ui_Dialog):
         self.backend_table = BackendThreadTable()
         self.backend_graph1 = graph_drawing()
         self.backend_graph2 = graph2_drawing()
-        self.timer.timeout.connect(self.graph_update_data)
-        self.timer2.timeout.connect(self.graph_update_data2)
+        #self.timer.timeout.connect(self.graph_update_data)
+        #self.timer2.timeout.connect(self.graph_update_data2)
         # self.checkBox_1.setChecked(True)
         # self.checkBox_2.setChecked(True)
         # self.checkBox_3.setChecked(True)
@@ -276,6 +262,13 @@ class RoverUI(QMainWindow, Ui_Dialog):
         self.checkBox_2.stateChanged.connect(self.btn_select_ch2_action)
         self.checkBox_3.stateChanged.connect(self.btn_select_ch3_action)
         self.checkBox_4.stateChanged.connect(self.btn_select_ch4_action)
+        # 切换V I P选项功能等修改完DB之后就可以重新enable
+        # self.checkBox_g1_i.stateChanged.connect(self.btn_select_g1_i_action)
+        # self.checkBox_g1_p.stateChanged.connect(self.btn_select_g1_p_action)
+        # self.checkBox_g1_v.stateChanged.connect(self.btn_select_g1_v_action)
+        # self.checkBox_g2_i.stateChanged.connect(self.btn_select_g2_i_action)
+        # self.checkBox_g2_p.stateChanged.connect(self.btn_select_g2_p_action)
+        # self.checkBox_g2_v.stateChanged.connect(self.btn_select_g2_v_action)
         self.comboBox_refresh_chs.currentIndexChanged.connect(self.btnSelectRefresh1Action)
         self.comboBox_refresh_table.currentIndexChanged.connect(self.btnSelectRefresh2Action)
         self.comboBox_graph.currentTextChanged.connect(self.btn_select_graph2_action)
@@ -283,11 +276,64 @@ class RoverUI(QMainWindow, Ui_Dialog):
         self.pushButton_start_p1.clicked.connect(self.btn_start_graph)
         self.pushButton_start_p2.clicked.connect(self.btn_start_graph2)
         self.pushButton_loadCFG.clicked.connect(self.btn_load_cfg)
+        # clear button handle
+        #self.pushButton_clear_table.clicked.connect(self.btn_clear_table)
         self.pushButton_clear_g1.clicked.connect(self.btn_clear_g1)
         self.pushButton_clear_g2.clicked.connect(self.btn_clear_g2)
+
+        self.pushButton_stop_table.clicked.connect(self.btn_stop_table)
+        self.pushButton_stop_p1.clicked.connect(self.btn_stop_graph1)
+        self.pushButton_stop_p2.clicked.connect(self.btn_stop_graph2)
         # self.backend.upadte_data.connect(self.dataDisplay)
         # self.backend.start()
         # self.backend_table.start()
+    # 切换V I P选项功能等修改完DB之后就可以重新enable
+    # def btn_select_g1_i_action(self):
+    #     selCh[0] = "GFX_TOTAL_I=GFX_PH1_I+GFX_PH2_I+GFX_PH3_I+GFX_PH4_I+GFX_PH5_I+GFX_PH6_I"
+    #     selCh[1] = 'CORE_TOTAL_I=CORE_PH1_I+CORE_PH2_I'
+    #     selCh[2] = 'SOC_TOTAL_I=SOC_PH1_I+SOC_PH2_I'
+    #     selCh[3] = 'VDDP_I'
+    # def btn_select_g1_p_action(self):
+    #     selCh[0] = 'GFX_P=GFX_FB_V*GFX_TOTAL_I'
+    #     selCh[1] = 'CORE_P=CORE_FB_V*CORE_TOTAL_I'
+    #     selCh[2] = 'SOC_P=SOC_FB_V*SOC_TOTAL_I'
+    #     selCh[3] = 'VDDP_P=VDDP_V*VDDP_I'
+    # def btn_select_g1_v_action(self):
+    #     selCh[0] = 'GFX_FB_V'
+    #     selCh[1] = 'CORE_FB_V'
+    #     selCh[2] = 'SOC_FB_V'
+    #     selCh[3] = 'VDDP_V'
+    # def btn_select_g2_i_action(self):
+    #     print(selCh[0][:3])
+    #     if selCh[0][0:3] == 'GFX':
+    #         selCh_g2[0] = "GFX_TOTAL_I"
+    #         print(selCh_g2[0])
+    #     elif selCh[0][0:4] == 'CORE':
+    #         selCh_g2[1] = "CORE_TOTAL_I"
+    #     elif selCh[0][0:3] == 'SOC':
+    #         selCh_g2[2] = "SOC_TOTAL_I"
+    #     elif selCh[0][0:3] == 'VDDP':
+    #         selCh_g2[3] = "VDDP_I=VDDP_CSR/0.01"
+    #         print(selCh_g2[3])
+    # def btn_select_g2_p_action(self):
+    #     if selCh[0][0:3] == 'GFX':
+    #         selCh_g2[0] = "GFX_P"
+    #     elif selCh[0][0:4] == 'CORE':
+    #         selCh_g2[0] = "CORE_P"
+    #     elif selCh[0][0:3] == 'SOC':
+    #         selCh_g2[0] = "SOC_P"
+    #     elif selCh[0][0:3] == 'VDDP':
+    #         selCh_g2[0] = "VDDP_P"
+    #
+    # def btn_select_g2_v_action(self):
+    #     if selCh[0][0:3] == 'GFX':
+    #         selCh_g2[0] = "GFX_TOTAL_V"
+    #     elif selCh[0][0:4] == 'CORE':
+    #         selCh_g2[0] = "CORE_TOTAL_V"
+    #     elif selCh[0][0:3] == 'SOC':
+    #         selCh_g2[0] = "SOC_TOTAL_V"
+    #     elif selCh[0][0:3] == 'VDDP':
+    #         selCh_g2[0] = "VDDP_V"
 
     def btn_select_ch1_action(self):
         selCh[0] = data_cfg['NAME'][0]
@@ -323,18 +369,35 @@ class RoverUI(QMainWindow, Ui_Dialog):
         print(myStr)
 
     def btn_start_table(self):
+
         self.backend.start()
+        self.backend_table.is_running = True
         self.backend_table.start()
         DataPaser(float(refresh[0]), selCh[0], selCh[1], selCh[2], selCh[3], selCh[4], selCh[5], selCh[6], selCh[7])
         self.backend.upadte_data.connect(self.dataDisplay)
         self.backend_table.upadte_table.connect(self.tableDisplay)
-        print('start')
+
+    # def btn_clear_table(self):
+    #     self.tableWidget.clear()
 
     def btn_clear_g1(self):
         self.graphicsView_2.clear()
+        self.backend_graph1.start()
 
     def btn_clear_g2(self):
         self.graphicsView.clear()
+
+    def btn_clear_table(self):
+        self.backend_table.clear()
+
+    def btn_stop_table(self):
+        self.backend_table.stop()
+
+    def btn_stop_graph1(self):
+        self.backend_graph1.stop()
+
+    def btn_stop_graph2(self):
+        self.backend_graph2.stop()
 
     def dataDisplay(self, data0, data1, data2, data3, data4, data5, data6, data7, time_data):
         self.label_timing.setText(time_data)
@@ -397,7 +460,12 @@ class RoverUI(QMainWindow, Ui_Dialog):
     def btn_start_graph(self):
         # data_collect(int(refresh[2]), selCh[0], selCh[1], selCh[2], selCh[3])
         global timing_p1
-
+        graph_x.clear()
+        graph_y.clear()
+        graph_y2.clear()
+        graph_y3.clear()
+        graph_y4.clear()
+        self.backend_graph1.is_running = True
         self.curver = self.graphicsView_2.plot(graph_x, graph_y, pen='y')
         self.curver2 = self.graphicsView_2.plot(graph_x, graph_y2, pen='r')
         self.curver3 = self.graphicsView_2.plot(graph_x, graph_y3, pen='g')
@@ -406,13 +474,13 @@ class RoverUI(QMainWindow, Ui_Dialog):
         # self.timer.start(100)
         #timing_p1 = timing
 
-    def graph_update_data(self):
-        global graph_x
-        global graph_y
-        global graph_y2
-        global graph_y3
-        global graph_y4
-        global timing_p1
+    # def graph_update_data(self):
+    #     global graph_x
+    #     global graph_y
+    #     global graph_y2
+    #     global graph_y3
+    #     global graph_y4
+    #     global timing_p1
 
         # start = time.time()
         #
@@ -448,9 +516,10 @@ class RoverUI(QMainWindow, Ui_Dialog):
     def btn_start_graph2(self):
         global timing2
         global arr_g2
+        self.backend_graph2.is_running = True
         # time.sleep(9)
         hist_bins = 30
-        A = 'select ' + selCh[0] + ' from roverdata WHERE Seconds = 0'
+        A = 'select ' + selCh_g2[0] + ' from roverdata WHERE Seconds = 0'
         #A = 'select ' + selCh[0] + ' from roverdata WHERE Seconds LIKE \'_.5\' OR Seconds LIKE \'_\''
         print(A)
         # conn = sqlite3.connect("rover.db")
@@ -495,46 +564,6 @@ class RoverUI(QMainWindow, Ui_Dialog):
         bg1 = pyqtgraph.BarGraphItem(x=histo[1][0:(len(bin_range) - 1)], height=histo[0] / len(arr_g2), width=width, brush='g')
         myRoverUI.graphicsView.addItem(bg1)
 
-    def graph_update_data2(self):
-        global timing2
-        global arr_g2
-
-        # start = time.time()
-        # hist_bins = 30
-        # timing2 = timing2 + 0.5
-        # A = 'select ' + 'GFX_FB_V' + ' from roverdata WHERE (Seconds LIKE \'_._\' OR Seconds LIKE \'__._\' OR Seconds LIKE \'_\' OR Seconds LIKE \'__\') AND Seconds = ' + str('{:g}'.format(timing2))
-        # #print(A)
-        # cursor1.execute(A)
-        #
-        # values = cursor1.fetchall()
-        # arr = np.array(values, dtype=np.float64)
-        # arr_g2 = numpy.append(arr_g2, arr.copy(), axis=0)
-        # m = arr_g2.copy()
-        # mu = np.mean(m)
-        # sigma = np.std(m)
-        # xMin = min(arr_g2).copy()
-        # xMax = max(arr_g2).copy()
-        # #n, bins, patches = plt.hist(m, hist_bins, density=0, alpha=0.75)
-        # bin_range = np.linspace(float(xMin), float(xMax), hist_bins)#float((xMax-xMin)/hist_bins)
-        # #print(bin_range)
-        # histo = numpy.histogram(m, bins=bin_range)
-        # # histo = plt.hist(m, hist_bins, density=0)
-        # #print(histo)
-        #
-        # title = 'Histogram: μ= ' + str(round(mu, 2)) + ' σ= ' + str(round(sigma, 2))  # 中文标题 u'xxx'
-        # self.graphicsView.setLabels(title=title)
-        #
-        # width = histo[1][1]-histo[1][0]
-        # yMax = max((histo[0] / len(arr_g2))).copy()
-        # self.graphicsView.clear()
-        # self.graphicsView.setRange(xRange=(xMin, xMax), yRange=(0, yMax))
-        # bg1 = pyqtgraph.BarGraphItem(x=histo[1][0:(len(bin_range)-1)], height=histo[0] / len(arr_g2), width=width, brush='g')
-        # self.graphicsView.addItem(bg1)
-        #
-        # end = time.time()
-        #
-        # stri = "run time: %f seconds" % (end - start)
-        # print(stri)
     def btn_load_cfg(self):
         global data_cfg
         _translate = QtCore.QCoreApplication.translate

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1019</width>
-    <height>533</height>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,10 +44,10 @@ color:rgb(255, 255, 255, 255);
 </string>
    </property>
    <property name="text">
-    <string>Start/Stop</string>
+    <string>Start</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="pushButton_stop_table">
    <property name="geometry">
     <rect>
      <x>110</x>
@@ -62,7 +62,7 @@ color:rgb(255, 255, 255, 255);
 </string>
    </property>
    <property name="text">
-    <string>Setting</string>
+    <string>Stop</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_3">
@@ -83,7 +83,7 @@ color:rgb(255, 255, 255, 255);
     <string>Auto Set</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_4">
+  <widget class="QPushButton" name="pushButton_clear_table">
    <property name="geometry">
     <rect>
      <x>280</x>
@@ -225,7 +225,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -240,7 +239,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -255,7 +253,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -270,7 +267,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -285,7 +281,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -300,7 +295,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -315,7 +309,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -330,7 +323,6 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -345,12 +337,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -360,12 +348,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -375,12 +359,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -390,12 +370,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -405,12 +381,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -420,12 +392,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <column>
@@ -435,12 +403,8 @@ border-top-color: rgb(255, 0, 0);</string>
     <property name="font">
      <font>
       <pointsize>7</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
-    </property>
-    <property name="textAlignment">
-     <set>AlignCenter</set>
     </property>
    </column>
    <item row="0" column="0">
@@ -1412,9 +1376,9 @@ color:rgb(255, 255, 255)</string>
   <widget class="QPushButton" name="pushButton_start_p1">
    <property name="geometry">
     <rect>
-     <x>750</x>
+     <x>730</x>
      <y>220</y>
-     <width>75</width>
+     <width>51</width>
      <height>23</height>
     </rect>
    </property>
@@ -1423,7 +1387,7 @@ color:rgb(255, 255, 255)</string>
 color:rgb(255, 255, 255)</string>
    </property>
    <property name="text">
-    <string>Start/Stop</string>
+    <string>Start</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_setting_g1">
@@ -1446,7 +1410,7 @@ color:rgb(255, 255, 255)</string>
   <widget class="QPushButton" name="pushButton_clear_g1">
    <property name="geometry">
     <rect>
-     <x>840</x>
+     <x>847</x>
      <y>220</y>
      <width>75</width>
      <height>23</height>
@@ -1720,40 +1684,6 @@ color:rgb(255,255,255);</string>
     <string>I</string>
    </property>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>840</x>
-     <y>470</y>
-     <width>158</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QPushButton" name="pushButton_start_p2">
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(69, 69, 69);
-color:rgb(255, 255, 255)</string>
-      </property>
-      <property name="text">
-       <string>Start/Stop</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QPushButton" name="pushButton_clear_g2">
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(69, 69, 69);
-color:rgb(255, 255, 255)</string>
-      </property>
-      <property name="text">
-       <string>Clear</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="PlotWidget" name="graphicsView">
    <property name="geometry">
     <rect>
@@ -1764,13 +1694,80 @@ color:rgb(255, 255, 255)</string>
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButton_stop_p1">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>220</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(69, 69, 69);
+color:rgb(255, 255, 255)</string>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_stop_p2">
+   <property name="geometry">
+    <rect>
+     <x>873</x>
+     <y>472</y>
+     <width>51</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(69, 69, 69);
+color:rgb(255, 255, 255)</string>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_start_p2">
+   <property name="geometry">
+    <rect>
+     <x>815</x>
+     <y>472</y>
+     <width>51</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(69, 69, 69);
+color:rgb(255, 255, 255)</string>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_clear_g2">
+   <property name="geometry">
+    <rect>
+     <x>930</x>
+     <y>472</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(69, 69, 69);
+color:rgb(255, 255, 255)</string>
+   </property>
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </widget>
   <zorder>label</zorder>
   <zorder>graphicsView</zorder>
-  <zorder>layoutWidget</zorder>
   <zorder>pushButton_start_table</zorder>
-  <zorder>pushButton_2</zorder>
+  <zorder>pushButton_stop_table</zorder>
   <zorder>pushButton_3</zorder>
-  <zorder>pushButton_4</zorder>
+  <zorder>pushButton_clear_table</zorder>
   <zorder>pushButton_loadCFG</zorder>
   <zorder>label_5</zorder>
   <zorder>label_6</zorder>
@@ -1826,6 +1823,10 @@ color:rgb(255, 255, 255)</string>
   <zorder>checkBox_g2_p</zorder>
   <zorder>checkBox_g2_v</zorder>
   <zorder>checkBox_g2_i</zorder>
+  <zorder>pushButton_stop_p1</zorder>
+  <zorder>pushButton_stop_p2</zorder>
+  <zorder>pushButton_start_p2</zorder>
+  <zorder>pushButton_clear_g2</zorder>
  </widget>
  <customwidgets>
   <customwidget>
